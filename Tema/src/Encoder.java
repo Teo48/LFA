@@ -3,7 +3,7 @@ import java.util.HashMap;
 
 public class Encoder {
 	private static Encoder instance;
-	private static final HashMap<String, Character> instructionSet;
+	public static final HashMap<String, Character> instructionSet;
 
 	static {
 		instructionSet = new HashMap<>();

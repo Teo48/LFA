@@ -1,10 +1,14 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigInteger;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Interpreter {
+	public static HashMap<Integer, Integer> leftParenthesisIndex = new HashMap<>();
+	public static HashMap<Integer, Integer> rightParenthesisIndex = new HashMap<>();
+
 	public static void main(String [] args) {
 		final String fileName = args[0];
 		Reader reader = Reader.getInstance(fileName);
@@ -13,78 +17,42 @@ public class Interpreter {
 		final String code = reader.readLine();
 		ArrayList<Character> instructionList = encoder.encode(code);
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		for (var i : instructionList) {
-			switch (i) {
-				case 'n': break;
-				case 'i': {
-					try {
-						BigInteger element = new BigInteger(br.readLine());
-						glyphoStack.glyStack.addLast(element);
-						break;
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				case '>': {
-					var element = glyphoStack.glyStack.pollLast();
-					glyphoStack.glyStack.addFirst(element);
-					break;
-				}
-				case '\\': {
-					var firstElement = glyphoStack.glyStack.pollLast();
-					var secondElement = glyphoStack.glyStack.pollLast();
-					glyphoStack.glyStack.addLast(firstElement);
-					glyphoStack.glyStack.addLast(secondElement);
-					break;
-				}
-				case '1': {
-					glyphoStack.glyStack.addLast(new BigInteger("1"));
-					break;
-				}
-				case '<': {
-					var element = glyphoStack.glyStack.pollFirst();
-					glyphoStack.glyStack.addLast(element);
-					break;
-				}
-				case 'd': {
-					glyphoStack.glyStack.addLast(glyphoStack.glyStack.getLast());
-					break;
-				}
-				case '+': {
-					var firstElement = glyphoStack.glyStack.pollLast();
-					var secondElement = glyphoStack.glyStack.pollLast();
-					glyphoStack.glyStack.addLast(secondElement.add(firstElement));
-				}
-				case '[': {
-					break;
-				}
-				case 'o': {
-					System.out.println(glyphoStack.glyStack.pollLast());
-					break;
-				}
-				case '*': {
-					var firstElement = glyphoStack.glyStack.pollLast();
-					var secondElement = glyphoStack.glyStack.pollLast();
-					glyphoStack.glyStack.addLast(secondElement.multiply(firstElement));
-					break;
-				}
-				case 'e': {
-					break;
-				}
-				case '-': {
-					var element = glyphoStack.glyStack.pollLast();
-					glyphoStack.glyStack.addLast(element.negate());
-					break;
-				}
-				case '!': {
-					glyphoStack.glyStack.pollLast();
-					break;
-				}
-				case ']' : {
-					break;
-				}
-				default: break;
+		InstructionExecutor instructionExecutor = InstructionExecutor.getInstance(br, glyphoStack);
+		// Preprocess indices for parenthesis
+//		for (var i : instructionList) {
+//			System.out.print(i);
+//		}
+//		System.out.println();
+
+		ArrayDeque<Integer> stack = new ArrayDeque<>();
+		for (int i = 0 ; i < instructionList.size(); ++i) {
+			if (instructionList.get(i) == '[') {
+				stack.addLast(i);
+			} else if (instructionList.get(i) == ']') {
+				int leftIndex = stack.pollLast();
+				leftParenthesisIndex.put(leftIndex, i);
+				rightParenthesisIndex.put(i, leftIndex);
 			}
+		}
+
+		//Collections.reverse(rightParenthesisIndex);
+
+//		for (int i : leftParenthesisIndex) {
+//			System.out.print(i + " ");
+//		}
+//		System.out.println();
+//		for (int i : rightParenthesisIndex) {
+//			System.out.print(i + " ");
+//		}
+//		System.out.println();
+		for (int i = 0 ; i < instructionList.size();) {
+			i = instructionExecutor.executeInstruction(instructionList.get(i), i);
+		}
+
+		try {
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }

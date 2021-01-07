@@ -33,7 +33,7 @@ public final class Reader {
 	 */
 	public String readLine() {
 		int eight = 8;
-		byte[] buf = new byte[1 << shifter];
+		byte[] buf = new byte[1 << 21];
 		int counter = zero;
 		int chr;
 
