@@ -1,0 +1,79 @@
+Copyright Teodor Matei 333CA - 2021
+
+ _____ _             _           
+|  __ \ |           | |          
+| |  \/ |_   _ _ __ | |__   ___  
+| | __| | | | | '_ \| '_ \ / _ \ 
+| |_\ \ | |_| | |_) | | | | (_) |
+ \____/_|\__, | .__/|_| |_|\___/ 
+          __/ | |                
+         |___/|_|                
+
+
+Organizarea surselor este urmatoarea:
+-------------------------------------
+
+- Reader: Clasa pentru parsarea rapida a inputului. Probabil BufferedReader
+ar fi fost suficient, dar un parser scris de mana e oricum mai rapid, asa ca
+am preferat sa folosesc propriul parser de la PA[1] pe care l-am ajustat
+pentru citirea unor linii de dimensiuni mai mari. Totusi, pentru datele primite
+de la stdin, care nu sunt multe/lungi si nu justificau un parser separat,
+am folosit BR.
+[1]: https://github.com/Teo48/PA/blob/master/Teme/Tema1/Reader.java
+
+- Interpreter: Clasa ce contine logica interpretorului. Aici se prelucreaza
+fisierul de intrare si se codifica instructiunile, se preproceseaza pozitiile
+parantezelor ce fac matching(Similar problemei Balanced Parenthesis, retin
+pe o stiva indexul unei paranteze deschise, la intalnirea unei paranteze
+inchise extrag indexul din stiva si introduc in doua hashmap-uri perechile:
+<index_paranteza_inchisa, index_paranteza_deschisa> si viceversa, pentru a
+avea acces eficient la pozitii in cazul instructiunilor '[' si ']'. In cazul
+in care dupa preprocesare stiva nu este goala, exista o paranteza deschisa
+ce nu are corespondent si atunci sa afiseaza eroarea corespunzatoare) si se
+executa instructiunile.
+
+- Encoder: Clasa responsabila de codificarea instructiunilor. Algoritmul
+folosit pentru codificare este urmatorul:
+-- Se parcurg chunk-uri de cate 4 caractere din sirul initial(totodata prin
+metoda asta facem si loop-unrolling asa ca eficientizam procesarea) si se
+codifica dupa cum urmeaza: Primul caracter va avea asociat tag-ul 0, iar apoi
+urmatorul caracter neintalnit anterior va avea valorea tag-ului precedent + 1.
+
+- InstructionExectuor: Clasa responsabila de executarea instructiunilor.
+Metoda executeInstruction simuleaza comportamentul unui Program Counter,
+returnand indicele instructiunii ce urmeaza sa fie executata.
+Implementarea instructiunilor este straightforward, voi descrie logica
+pentru 'e', '[' si ']' care pot parea putin mai tricky.
+-- Pentru instructiunea execute: Se extrag 4 valori de pe stiva(discut despre
+tratarea exceptiilor in sectiunea urmatoare), se face codificarea ca si
+pentru string-ul initial si realizeaza un apel al lui executeInstruction,
+tratand astfel si posibilitatea obtinerii unui nou execute in cadrul celui
+curent.
+-- Pentru instructiunile '[' si ']' in cazul in care varful stivei e 0,
+instruction pointer-ul e mutat la paranteza inchisa, respectiv deschisa
+asociata, altfel se executa pe rand instructiunile urmatoare. Facandu-se
+doar apeluri de get pe hashmap-uri si atribuiri pentru indexul instructiunii,
+complexitatea operatiilor este O(1), astfel ca metoda folosita de mine este
+eficienta in cazul loop-urilor cu repetitii de dimensiuni mari.
+
+- GlyphoStack: Clasa ce implementeaza stiva interpretorului nostru. Aceasta
+nu este decat un deque ce stocheaza BigIntegers.
+
+Tratarea exceptiilor:
+---------------------
+- Pentru datele de intrare ce nu respecta formatul, ma folosesc de
+constructorul BigInteger care arunca o exceptie in cazul in care string-ul
+ce se doreste a fi convertit nu face parte din baza respectiva, asa ca nu-mi
+ramane de facut decat sa prind exceptia.
+- Pentru celelalte exceptii, doar verific dimensiunea stivei la momentul
+respectiv in functie de instructiunea curenta.
+
+Tratarea erorilor:
+------------------
+- Atat lungimea codului cat si matching-ul parantezelor este tratat la
+preprocesarea string-ului primit ca input.
+
+Feedback
+--------
+O tema interesanta.
+Cheers! 

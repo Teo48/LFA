@@ -1,6 +1,10 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * @author Teo
+ * */
+
 public class Encoder {
 	private static Encoder instance;
 	public static final HashMap<String, Character> instructionSet;

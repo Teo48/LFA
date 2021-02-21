@@ -1,6 +1,10 @@
 import java.math.BigInteger;
 import java.util.ArrayDeque;
 
+/**
+ * @author Teo
+ * */
+
 public class GlyphoStack {
 	public ArrayDeque<BigInteger> glyStack;
 	private static GlyphoStack instance;
